@@ -1,29 +1,33 @@
-#include <iostream>
-#include <vector>
-#include <algorithm>
+ #include <iostream>
+    #include <sstream>
+    #include <vector>
+    #include <algorithm>
+    #include <iterator>
 
-int MaxPairwiseProduct(const std::vector<int>& numbers) {
-    int max_product = 0;
-    int n = numbers.size();
+    using namespace std;
 
-    for (int first = 0; first < n; ++first) {
-        for (int second = first + 1; second < n; ++second) {
-            max_product = std::max(max_product,
-                numbers[first] * numbers[second]);
+    template< typename Type >
+    class Solution {
+    public:
+
+        using Collection = vector< Type >;
+        using Iter = istream_iterator< Type >;
+
+        void test( istream& input, ostream& output, Collection A={}, size_t N=0, Type first=0, Type second=0 ){
+            input >> N, copy_n( Iter( input ), N, back_inserter( A ));
+            auto i = max_element( A.begin(), A.end() ); first  = *i, *i = 0;
+            auto j = max_element( A.begin(), A.end() ); second = *j;
+            output << first * second << endl;
         }
+
+    };
+
+    int main(){
+
+        using Type = unsigned long long;
+
+        Solution< Type > solution;
+        solution.test( cin, cout );
+
+        return 0;
     }
-
-    return max_product;
-}
-
-int main() {
-    int n;
-    std::cin >> n;
-    std::vector<int> numbers(n);
-    for (int i = 0; i < n; ++i) {
-        std::cin >> numbers[i];
-    }
-
-    std::cout << MaxPairwiseProduct(numbers)<< "\n";
-    return 0;
-}
