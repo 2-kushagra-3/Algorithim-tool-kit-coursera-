@@ -1,69 +1,62 @@
-    #include <iostream>
-    #include <vector>
-    #include <random>
-    #include <sstream>
-    #include <algorithm>
-    #include <iterator>
+#include <cstdlib>
+#include <iostream>
+#include <utility>
+#include <vector>
 
-    using namespace std;
+using std::swap;
+using std::vector;
 
-    template< typename Type >
-    class Solution
-    {
-    public:
-        using Collection = vector< Type >;
-        using Iter = typename Collection::iterator;
-        void quickSort( Collection& A ){
-            go( A, A.begin(), A.end() );
-        }
-    private:
-        void go( Collection& A, Iter L, Iter R ){   // go() sorts from [ L : R ), that is, from L (inclusive) to R (non-inclusive)
-            if( L >= R )
-                return;
-            iter_swap( L, random( L, R ));          // set pivot as first element
-            auto[ M1, M2 ] = partition3( A, L, R );
-            go( A, L, M1 );
-            go( A, M2, R );
-        }
-        Iter partition( Collection& A, Iter L, Iter R ){
-            auto threshold{ L }, less{ L+1 };
-            for( auto more{ less }; more != R; ++more )
-                if( *more < *threshold )
-                    iter_swap( less++, more );
-            auto pivot{ less-1 };
-            iter_swap( L, pivot );
-            return pivot;
-        }
-        pair< Iter, Iter > partition3( Collection& A, Iter L, Iter R ){
-            auto P = partition( A, L, R ),
-                 M1{ P },
-                 M2{ P };
-            for( auto i{ R-1 }; M2 <= i; )
-                if( *i == *P )
-                    iter_swap( i, M2++ );
-                else
-                    --i;
-            return{ M1, M2 };
+int partition2(vector<int> &a, int l, int r) {
+	int x = a[l];
+	int j = l;
+	for (int i = l + 1; i <= r; i++) {
+		if (a[i] <= x) {
+			j++;
+			swap(a[i], a[j]);
+		}
+	}
+	swap(a[l], a[j]);
+	return j;
+}
 
-        }
-        using RandomDevice = random_device;
-        using Generator = mt19937;
-        using Distribution = uniform_int_distribution< int >;
-        Iter random( Iter L, Iter R, RandomDevice randomDevice=RandomDevice() ){
-            Generator randomGenerator{ randomDevice() };
-            int size = distance( L, R-1 );        // R-1 since R is non-inclusive
-            Distribution distribution{ 0, size }; // distribution from [ 0 : size ], that is 0 ( inclusive ) to size ( inclusive )
-            return L + distribution( randomGenerator );
-        }
-    };
+std::pair<int, int> partition3(vector<int> &a, int l, int r) {
+	int x = a[l];
+	int j = l;
+	int k = r;
+	for (int i = l; i <= r; i++) {
+		if (a[i] < x) {
+			swap(a[i], a[j]);
+			j++;
+		}
+	}
+	for (int i = r; i >= l; i--) {
+		if (a[i] > x) {
+			swap(a[i], a[k]);
+			k--;
+		}
+	}
 
-    int main() {
-        using Type = size_t;
-        Solution< Type > solution;
-        Solution< Type >::Collection A;
-        auto N{ 0 }; cin >> N;
-        copy_n( istream_iterator< Type >( cin ), N, back_inserter( A ));
-        solution.quickSort( A );
-        copy( A.begin(), A.end(), ostream_iterator< Type >( cout, " " ));
-        return 0;
-    }
+	for (int i = j; i <= k; i++) { a[i] = x; }
+
+	return std::make_pair(j, k);
+}
+
+void randomized_quick_sort(vector<int> &a, int l, int r) {
+	if (l >= r) { return; }
+
+	int k = l + rand() % (r - l + 1);
+	swap(a[l], a[k]);
+	auto m = partition3(a, l, r);
+
+	randomized_quick_sort(a, l, m.first - 1);
+	randomized_quick_sort(a, m.second + 1, r);
+}
+
+int main() {
+	int n;
+	std::cin >> n;
+	vector<int> a(n);
+	for (size_t i = 0; i < a.size(); ++i) { std::cin >> a[i]; }
+	randomized_quick_sort(a, 0, a.size() - 1);
+	for (size_t i = 0; i < a.size(); ++i) { std::cout << a[i] << ' '; }
+}
